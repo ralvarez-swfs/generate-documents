@@ -1,0 +1,6 @@
+com\smallworldfs\error\GenerateDocumentException.class
+com\smallworldfs\bd\model\TransferDocument.class
+com\smallworldfs\Main.class
+com\smallworldfs\DBConnection.class
+com\smallworldfs\Validation.class
+com\smallworldfs\FileUtils.class
