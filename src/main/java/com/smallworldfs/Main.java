@@ -46,21 +46,23 @@ public class Main {
         Set<Long> inserted = new HashSet<>();
         Map<Long, Integer> filesPerMtn = new HashMap<>();
 
-        String sql = "SELECT clientid, picture, mtn, pictureid, fileName " +
+        String sql = "SELECT clientid, picture, mtn, pictureid,p.originalid, fileName " +
                 "FROM EIS.CLI_ID_PICTURE p " +
                 "JOIN EIS.TXN_TRANSACTION t on (p.CLIENTID = t.SENDINGCLIENTID) " +
                 "WHERE t.SENDINGDATE BETWEEN ? AND ?" +
                 "AND t.SENDINGCOUNTRYID = 4 " +
                 "AND p.IDID is not null order by CLIENTID";
-
-        while (initDate.compareTo(endDate) <= 0) {
-            LocalDate limitSupDate = initDate.plusDays(1);
-            FileUtils.writePicturesToDisk(
-                    dbConnection.getDocumentBetweenDates(inserted, sql, initDate, limitSupDate, filesPerMtn), path,
-                    filesPerMtn);
-            initDate = initDate.plusDays(1);
+        try {
+            while (initDate.compareTo(endDate) <= 0) {
+                LocalDate limitSupDate = initDate.plusDays(1);
+                FileUtils.writePicturesToDisk(
+                        dbConnection.getDocumentBetweenDates(inserted, sql, initDate, limitSupDate, filesPerMtn), path);
+                initDate = initDate.plusDays(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        System.out.println("Document generation finished .... TOTAL FILES: "+ inserted.size() );
+        System.out.println("Document generation finished .... TOTAL FILES: " + inserted.size());
     }
 
     private static void validateInputs(String[] args) {

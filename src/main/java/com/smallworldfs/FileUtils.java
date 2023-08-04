@@ -31,7 +31,7 @@ public class FileUtils {
     }
 
 
-    public static void writePicturesToDisk(List<TransferDocument> transferDocuments, String path, Map<Long, Integer> pictures) {
+    public static void writePicturesToDisk(List<TransferDocument> transferDocuments, String path) {
         for (TransferDocument transferDocument : transferDocuments) {
             String name = path + transferDocument.getSenderFileName();
             try (FileOutputStream outputStream = new FileOutputStream(name)) {

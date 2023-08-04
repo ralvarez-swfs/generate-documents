@@ -7,18 +7,20 @@ public class TransferDocument {
     private String fileName;
     private Long pictureId;
 
+    private Long originalId;
+
     private String senderFileName;
 
     public TransferDocument() {
 
     }
 
-    public TransferDocument(byte[] picture, Long mtn, String fileName, Long pictureId) {
+    public TransferDocument(byte[] picture, Long mtn, String fileName, Long pictureId, Long originalId) {
         this.picture = picture;
         this.mtn = mtn;
         this.fileName = fileName;
         this.pictureId = pictureId;
-
+        this.originalId = originalId;
     }
 
 
@@ -60,6 +62,14 @@ public class TransferDocument {
 
     public void setSenderFileName(Integer numberOfDocuments) {
         this.senderFileName = this.mtn + "_" + numberOfDocuments + "." + getFileExtension();
+    }
+
+    public Long getOriginalId() {
+        return originalId;
+    }
+
+    public void setOriginalId(Long originalId) {
+        this.originalId = originalId;
     }
 
     private String getFileExtension() {

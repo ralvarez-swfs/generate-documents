@@ -2,6 +2,13 @@ package com.smallworldfs;
 
 import com.smallworldfs.bd.model.TransferDocument;
 import com.smallworldfs.error.GenerateDocumentException;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,6 +25,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 public class DBConnection {
 
     private static DataSource dataSource;
+    private static int numS3;
+
 
 
     public DBConnection(String url, String user, String password) {
@@ -49,13 +58,24 @@ public class DBConnection {
             int count = 0;
             int discarted = 0;
             while (resultSet.next()) {
+                Long originalId = resultSet.getLong("originalId");
                 Long pictureId = resultSet.getLong("pictureId");
                 if (!inserted.contains(pictureId)) {
                     count++;
                     TransferDocument transferDocument = new TransferDocument();
                     transferDocument.setPictureId(pictureId);
                     transferDocument.setFileName(resultSet.getString("fileName"));
-                    transferDocument.setPicture(resultSet.getBytes("picture"));
+
+                    if(resultSet.getBytes("picture") == null) {
+                            numS3++;
+                            System.out.println("ID_PICTURE con valor PICTURE a null: "+pictureId);
+                            continue;
+                            //Long id =  originalId != null ? originalId : pictureId;
+                            // transferDocument.setPicture(getDocumentFromS3(id));
+                    } else {
+                        transferDocument.setPicture(resultSet.getBytes("picture"));
+                    }
+
                     transferDocument.setMtn(resultSet.getLong("mtn"));
 
 
@@ -83,5 +103,32 @@ public class DBConnection {
         } else {
             filesPerMtn.put(mtn, 0);
         }
+    }
+
+    public byte[] getDocumentFromS3(Long id) throws IOException {
+        System.out.println("Log: obteniendo imagen del s3: "+id);
+        String sUrl = "http://document-management-service.dev.swfs.cloud/documents/CLIENT_ID_PICTURE/"+id;
+        URL url = new URL(sUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        try (InputStream in = conn.getInputStream()) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = in.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, bytesRead);
+            }
+            buffer.flush();
+            return buffer.toByteArray();
+        }
+    }
+
+    public static int getNumS3() {
+        return numS3;
+    }
+
+    public static void setNumS3(int numS3) {
+        DBConnection.numS3 = numS3;
     }
 }
